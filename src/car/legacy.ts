@@ -3,10 +3,12 @@
 // materials and animation; only geometry and anchor positions come from here.
 import { type BufferGeometry, Vector3 } from 'three';
 import { buildCarParts, PART_PIVOTS, type RoleGeo } from './parts';
+import { runningGear } from './body/closures';
+import { OIL_CAP, RAD_CAP } from './details/engine';
+import { fuelDoor } from './details/trim';
 import { buildWheel } from './details/wheel';
 import { steeringWheel } from './details/interior';
-import { bodySkin } from './body/skin';
-import { rbox, cyl } from './mesh/prims';
+import { rbox } from './mesh/prims';
 
 /** New role -> game role (materials are resolved by the game). */
 const ROLE: Record<string, string> = {
@@ -37,7 +39,7 @@ function toGame(src: RoleGeo, skip: readonly string[] = []): Record<string, Buff
 }
 
 let built: ReturnType<typeof buildCarParts> | null = null;
-const car = () => (built ??= buildCarParts({ steering: false }));
+const car = () => (built ??= buildCarParts({ steering: false, frame: false }));
 
 /** Body shell + structure + cabin (the game adds frame, gauges, controls itself). */
 export function legacyShell(): Record<string, BufferGeometry[]> {
@@ -78,21 +80,19 @@ export function legacyGlovebox(): { geo: BufferGeometry[]; hinge: Vector3 } {
   return { geo: [lid, handle], hinge };
 }
 
-/** Fuel door on the left rear quarter, placed on the skin. */
+/** Fuel door on the left rear quarter, anchored on the skin. */
 export function legacyFuelDoor(): { door: BufferGeometry[]; cap: BufferGeometry; neck: Vector3; hinge: Vector3 } {
-  const skin = bodySkin();
-  const zc = -1.8, yc = 0.845;
-  // nearest skin vertex on the left side gives the surface point and normal
-  let best = -1, bestD = Infinity;
-  const P = skin.mesh.pos;
-  for (let v = 0; v < P.length / 3; v++) {
-    if (P[v * 3] < 0.5) continue;
-    const d = (P[v * 3 + 1] - yc) ** 2 + (P[v * 3 + 2] - zc) ** 2;
-    if (d < bestD) { bestD = d; best = v; }
-  }
-  const x = P[best * 3];
-  const nx = skin.normals[best * 3];
-  const door = rbox(0.012, 0.13, 0.15, 0.03, x + 0.002 * Math.sign(nx), yc, zc, 0, 0, 0);
-  const cap = cyl([x - 0.03, yc, zc], [x - 0.012, yc, zc], 0.034, 0.034, 20);
-  return { door: [door], cap, neck: new Vector3(x - 0.02, yc, zc), hinge: new Vector3(x, yc, zc + 0.075) };
+  const f = fuelDoor();
+  return { door: f.door, cap: f.cap, neck: f.neck, hinge: f.hinge };
 }
+
+/** Running gear + exhaust replace the old ladder frame. */
+export function legacyFrame(): Record<string, BufferGeometry[]> {
+  return toGame(runningGear());
+}
+
+export const LEGACY_POINTS = {
+  oil: new Vector3(...OIL_CAP),
+  radiator: new Vector3(...RAD_CAP),
+  exhaust: new Vector3(-0.5, 0.285, -2.92),
+};

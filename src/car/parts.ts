@@ -5,7 +5,7 @@ import { DIMS } from './dims';
 import { bodySkin, skinGeometry, type BodySkin } from './body/skin';
 import { type Tag } from './body/cage';
 import { solidify, boundaryLoops } from './mesh/solidify';
-import { buildClosures } from './body/closures';
+import { buildClosures, runningGear } from './body/closures';
 import { headlightInternals, taillightInternals } from './details/lamps';
 import { buildWheel } from './details/wheel';
 import { beltMoulding, frontTrim, fuelDoor, handle, mirror, rearTrim, shellSideTrims, shellTrim, sideMoulding, trunkTrim } from './details/trim';
@@ -87,13 +87,14 @@ function door(skin: BodySkin, name: 'door_fl' | 'door_fr' | 'door_rl' | 'door_rr
   return r;
 }
 
-export function buildCarParts(opts: { steering?: boolean } = {}): { shell: RoleGeo; parts: Record<string, RoleGeo> } {
+export function buildCarParts(opts: { steering?: boolean; frame?: boolean } = {}): { shell: RoleGeo; parts: Record<string, RoleGeo> } {
   const skin = bodySkin();
   const shellTags: Tag[] = ['roof', 'aPillar', 'cPillar', 'quarter', 'rocker', 'cowl'];
   const sf = facesOf(skin, shellTags);
   const s = solidify(skin.mesh, skin.normals, sf, { gap: 0.0025, rim: 0.08 });
   const shell: RoleGeo = { paint: [s.geo(sf)], seal: [s.rim!] };
   mergeInto(shell, buildClosures());
+  if (opts.frame !== false) mergeInto(shell, runningGear());
   mergeInto(shell, shellTrim());
   mergeInto(shell, shellSideTrims());
   mergeInto(shell, rearTrim());
@@ -108,6 +109,8 @@ export function buildCarParts(opts: { steering?: boolean } = {}): { shell: RoleG
   parts.hood = panel(skin, ['hood'], 0.02, true);
   add(parts.hood, 'pad', skinGeometry(skin, ['hood'], { offset: -0.045, flip: true }));
   parts.trunk = panel(skin, ['trunk'], 0.02, true);
+  const gar = panel(skin, ['garnish_r'], 0.02, true);
+  mergeInto(parts.trunk, { blackGloss: gar.paint ?? [], seal: gar.seal ?? [], paintIn: gar.paintIn ?? [] });
   mergeInto(parts.trunk, recess(skin, ['plate_r'], 0.014, 'paint', 'seal'));
   mergeInto(parts.trunk, trunkTrim());
   parts.fender_fl = panel(skin, ['fender_fl'], 0.03, false);

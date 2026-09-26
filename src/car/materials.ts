@@ -63,7 +63,7 @@ export function studioMaterials(paint = '#b9a58f'): RoleMaterials {
     red: std('#b01818', 0.4),
     frame: std('#1b1b1b', 0.6, 0.4),
     susp: std('#2b2b2d', 0.6, 0.4),
-    spring: std('#8a1a14', 0.45, 0.3),
+    spring: std('#303236', 0.45, 0.4),
     exhaust: std('#5a5a57', 0.65, 0.7),
     // interior
     dash: std('#232426', 0.78),

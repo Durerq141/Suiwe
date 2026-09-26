@@ -10,7 +10,7 @@ import { RenderPass as un } from "three/addons/postprocessing/RenderPass.js";
 import { ShaderPass as Ii } from "three/addons/postprocessing/ShaderPass.js";
 import { UnrealBloomPass as VE } from "three/addons/postprocessing/UnrealBloomPass.js";
 import { mergeGeometries as uw, mergeVertices as bi } from "three/addons/utils/BufferGeometryUtils.js";
-import { legacyShell, legacyPart, legacyDisc, legacyCaliper, LEGACY_PIVOTS, legacySteering, legacyGlovebox, legacyFuelDoor } from '../car/legacy';
+import { legacyShell, legacyPart, legacyDisc, legacyCaliper, LEGACY_PIVOTS, legacySteering, legacyGlovebox, legacyFuelDoor, legacyFrame, LEGACY_POINTS } from '../car/legacy';
 var tC = { sunColor: new Float32Array([1, 0.9, 0.75]), sunDir: new Float32Array([0, 1, 0]), params: new Float32Array([0.012, 0, 8, 1]) }, zJ = `
 #ifdef USE_FOG
   uniform vec3 fogColor;
@@ -3683,52 +3683,9 @@ function Ck(B, A, I, g = 6) {
 }
 var HI = (B, A, I) => new y(B, A, I), El = null;
 function Bk() {
-  if (El) return El;
-  let B = {};
-  for (let i of [1, -1]) {
-    let E = [HI(i * 0.5, 0.33, 2.2), HI(i * 0.5, 0.3, 1.9), HI(i * 0.52, 0.26, 1.2), HI(i * 0.56, 0.2, 0.6), HI(i * 0.58, 0.195, -0.5), HI(i * 0.56, 0.21, -0.95), HI(i * 0.52, 0.34, -1.25), HI(i * 0.52, 0.36, -1.65), HI(i * 0.52, 0.33, -2), HI(i * 0.5, 0.33, -2.6)];
-    m(B, "frame", hR(new DC(E).getPoints(40), 0.07, 0.1));
-  }
-  for (let [i, E, t] of [[2.15, 0.33, 0.1], [1.2, 0.24, 0.1], [0.25, 0.19, 0.07], [-0.9, 0.2, 0.08], [-1.95, 0.33, 0.09], [-2.55, 0.33, 0.1]]) {
-    let o = i > 1 || i < -1.5 ? 0.5 : 0.58, e = new tg(o * 2, t, 0.08, 2, 0.015);
-    e.translate(0, E, i), m(B, "frame", e);
-  }
-  for (let i of [1, -1]) {
-    let E = HI(i * (V.track - 0.1), V.wheelR, V.axleF);
-    m(B, "susp", cg([HI(i * 0.46, 0.25, V.axleF + 0.18), E.clone().add(HI(0, -0.13, 0)), HI(i * 0.46, 0.25, V.axleF - 0.2)], 0.022, 6)), m(B, "susp", cg([HI(i * 0.48, 0.56, V.axleF + 0.12), E.clone().add(HI(-i * 0.02, 0.15, 0)), HI(i * 0.48, 0.56, V.axleF - 0.14)], 0.018, 6));
-    let t = new tg(0.05, 0.3, 0.07, 2, 0.015);
-    t.translate(E.x, E.y, E.z), m(B, "susp", t), m(B, "spring", Ck(HI(i * 0.52, 0.3, V.axleF), 0.36, 0.05, 6));
-    let o = new VA(0.022, 0.022, 0.42, 10);
-    o.translate(i * 0.52, 0.49, V.axleF), m(B, "susp", o);
-  }
-  m(B, "susp", cg([HI(0.62, 0.3, V.axleF - 0.25), HI(0.45, 0.32, V.axleF + 0.28), HI(-0.45, 0.32, V.axleF + 0.28), HI(-0.62, 0.3, V.axleF - 0.25)], 0.013, 6));
-  let A = new VA(0.028, 0.028, 0.8, 10);
-  A.rotateZ(Math.PI / 2), A.translate(0, 0.3, V.axleF - 0.12), m(B, "susp", A);
-  let I = new VA(0.045, 0.045, V.track * 2 - 0.2, 14);
-  I.rotateZ(Math.PI / 2), I.translate(0, V.wheelR, V.axleR), m(B, "susp", I);
-  let g = new ug(0.11, 18, 14);
-  g.scale(1, 0.85, 1.15), g.translate(0, V.wheelR, V.axleR + 0.02), m(B, "susp", g);
-  for (let i of [1, -1]) {
-    m(B, "susp", cg([HI(i * 0.56, 0.24, -0.62), HI(i * 0.6, 0.26, -1.1), HI(i * 0.62, V.wheelR - 0.06, V.axleR)], 0.024, 6)), m(B, "spring", Ck(HI(i * 0.52, V.wheelR + 0.05, V.axleR - 0.03), 0.2, 0.06, 4));
-    let E = new VA(0.021, 0.021, 0.36, 10);
-    E.rotateX(0.25), E.translate(i * 0.4, 0.46, V.axleR - 0.1), m(B, "susp", E);
-  }
-  let C = new VA(0.12, 0.2, 0.62, 16);
-  C.rotateX(Math.PI / 2), C.translate(0, 0.36, 0.75), m(B, "susp", C), m(B, "susp", cg([HI(0, 0.34, 0.42), HI(0, 0.34, -0.4), HI(0, V.wheelR, V.axleR + 0.16)], 0.036, 10));
-  for (let i of [1, -1]) {
-    let E = [HI(i * 0.24, 0.3, 1.25), HI(i * 0.28, 0.2, 0.9), HI(i * 0.3, 0.18, 0.1), HI(i * 0.34, 0.2, -0.95), HI(i * 0.38, 0.38, -1.25), HI(i * 0.4, 0.38, -1.7), HI(i * 0.42, 0.28, -2.2), HI(i * 0.44, 0.27, -2.84)];
-    m(B, "exhaust", cg(new DC(E).getPoints(16), 0.028, 8));
-    let t = new tg(0.2, 0.12, 0.5, 3, 0.04);
-    t.translate(i * 0.31, 0.19, -0.35), m(B, "exhaust", t);
-    let o = new VA(0.036, 0.034, 0.12, 16, 1, true);
-    o.rotateX(Math.PI / 2), o.translate(i * 0.44, 0.27, -2.86), m(B, "chrome", o);
-    let e = new VA(0.03, 0.03, 0.11, 16, 1, true);
-    e.rotateX(Math.PI / 2), e.scale(-1, 1, 1), e.translate(i * 0.44, 0.27, -2.86), m(B, "engineDark", e, new VC(0.03, 16).translate(i * 0.44, 0.27, -2.83).rotateY(0));
-  }
-  let Q = new tg(0.9, 0.16, 0.5, 3, 0.05);
-  return Q.translate(0, 0.17, -0.62), m(B, "frame", Q), El = B, B;
+  return El ??= legacyFrame();
 }
-var QH = new y(-0.44, 0.27, -2.92);
+var QH = LEGACY_POINTS.exhaust.clone();
 var tl = /* @__PURE__ */ new Map();
 function AE(B, A) {
   return tl.has(B) || tl.set(B, A()), tl.get(B);
@@ -4145,7 +4102,7 @@ function GQ(B, A, I, g, C = 16) {
 function Ih(B, A, I) {
   return B.applyMatrix4(new TA().makeRotationZ(I).setPosition(A)), B;
 }
-var iB = 1.36, cl = RA(0.3, 0.79, 1.58), ll = RA(0.24, 0.84, 2.07);
+var iB = 1.36, cl = LEGACY_POINTS.oil.clone(), ll = LEGACY_POINTS.radiator.clone();
 function Fk() {
   let B = {};
   m(B, "engineDark", fA(0.36, 0.12, 0.62, 0.03, RA(0, 0.33, iB))), m(B, "engine", fA(0.42, 0.26, 0.66, 0.03, RA(0, 0.51, iB)));

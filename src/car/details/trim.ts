@@ -57,11 +57,11 @@ export function mirror(side: 1 | -1): RoleGeo {
   const m = frameMatrix(h);
   // local: Z outward, Y up, X towards the rear
   add(r, 'blackGloss', at(rbox(0.14, 0.05, 0.03, 0.012, 0.01, 0.0, 0.0), m));
-  add(r, 'black', at(rbox(0.08, 0.04, 0.09, 0.016, 0.01, 0.03, 0.05, 0.25, 0, 0), m));
+  add(r, 'black', at(rbox(0.06, 0.035, 0.075, 0.014, 0.012, 0.032, 0.045, 0.25, 0, 0), m));
   add(r, 'paint', at(rbox(0.095, 0.12, 0.215, 0.042, 0.02, 0.085, 0.155), m));
-  add(r, 'blackGloss', at(rbox(0.012, 0.106, 0.2, 0.036, 0.02 + 0.044, 0.085, 0.155), m));
-  add(r, 'mirror', at(rbox(0.004, 0.094, 0.186, 0.03, 0.02 + 0.051, 0.085, 0.155), m));
-  add(r, 'amber', at(rbox(0.03, 0.01, 0.1, 0.004, -0.005, 0.085 - 0.058, 0.2), m));
+  // glass sits recessed inside the housing's rear opening
+  add(r, 'blackGloss', at(rbox(0.012, 0.1, 0.19, 0.034, 0.02 + 0.037, 0.085, 0.157), m));
+  add(r, 'mirror', at(rbox(0.004, 0.09, 0.178, 0.03, 0.02 + 0.0445, 0.085, 0.157), m));
   if (side > 0) return r;
   const out: RoleGeo = {};
   for (const [k, list] of Object.entries(r)) out[k] = list.map(mirrorX);
@@ -225,10 +225,14 @@ export function trunkTrim(): RoleGeo {
     add(r, 'plate', at(box(0.52, 0.112, 0.003, 0, 0, 0.002), m));
     add(r, 'lampHousing', at(box(0.08, 0.012, 0.012, 0, 0.068, 0.0), m));
   }
-  // chrome garnish above the plate recess
-  const hits = sample((x) => fromRear(x, 0.9, ['trunk']), -0.46, 0.46, 20);
-  add(r, 'chrome', surfaceStrip(hits, 0.011, 0.005));
-  const bh = fromRear(0, 0.955, ['trunk']);
+  // chrome strip under the black garnish, badge on the garnish
+  const hits = sample((x) => fromRear(x, 0.848, ['trunk']), -0.5, 0.5, 20);
+  add(r, 'chrome', surfaceStrip(hits, 0.008, 0.004));
+  for (const s of [1, -1]) {
+    const rh = fromRear(0.33 * s, 0.95, ['garnish_r']);
+    if (rh) add(r, 'reverse', at(rbox(0.14, 0.05, 0.006, 0.01, 0, 0, 0.001), frameMatrix(rh)));
+  }
+  const bh = fromRear(0, 0.955, ['garnish_r']);
   if (bh) {
     const badge = lathe([[0.001, 0.007], [0.036, 0.006], [0.04, 0.002], [0.036, 0]], [0, 0, 0], [0, 0, 1], 32);
     badge.scale(1, 0.6, 1);

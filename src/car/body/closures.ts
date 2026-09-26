@@ -98,7 +98,8 @@ function exhaust(): BufferGeometry[] {
   return out;
 }
 
-function runningGear(): RoleGeo {
+/** Subframes, suspension, drive shafts, tank and exhaust (the game's "frame" group). */
+export function runningGear(): RoleGeo {
   const r: RoleGeo = {};
   const { axleF, axleR, track } = DIMS;
   push(r, 'frame', rbox(1.0, 0.06, 0.12, 0.02, 0, 0.23, axleF + 0.18), rbox(1.0, 0.06, 0.12, 0.02, 0, 0.23, axleF - 0.2), rbox(0.08, 0.06, 0.5, 0.02, 0.44, 0.23, axleF), rbox(0.08, 0.06, 0.5, 0.02, -0.44, 0.23, axleF));
@@ -129,11 +130,11 @@ export function buildClosures(): RoleGeo {
   for (const s of [1, -1]) {
     bay.push(box(0.03, 0.44, 1.12, 0.6 * s, 0.63, 1.55));
     bay.push(box(0.23, 0.025, 1.12, 0.715 * s, 0.855, 1.55, 0, 0, -0.06 * s));
-    bay.push(cyl([0.6 * s, 0.6, axleF - 0.02], [0.585 * s, 0.9, axleF - 0.02], 0.1, 0.085, 24));
+    bay.push(cyl([0.62 * s, 0.8, axleF - 0.02], [0.6 * s, 0.9, axleF - 0.02], 0.085, 0.075, 24));
     bay.push(box(0.06, 0.5, 0.06, 0.6 * s, 0.63, 2.12));
   }
   push(r, 'paintIn', ...bay);
-  for (const s of [1, -1]) push(r, 'black', cyl([0.585 * s, 0.9, axleF - 0.02], [0.585 * s, 0.915, axleF - 0.02], 0.05, 0.05, 20));
+  for (const s of [1, -1]) push(r, 'black', cyl([0.6 * s, 0.9, axleF - 0.02], [0.6 * s, 0.912, axleF - 0.02], 0.045, 0.045, 20));
 
   // trunk tub
   push(r, 'carpet',
@@ -160,7 +161,6 @@ export function buildClosures(): RoleGeo {
   }
 
   for (const [role, list] of Object.entries(bPillar())) push(r, role, ...list);
-  for (const [role, list] of Object.entries(runningGear())) push(r, role, ...list);
   // roof-rail inner trims above the door openings
   const rail: P3[] = [];
   for (let i = 0; i <= 12; i++) {

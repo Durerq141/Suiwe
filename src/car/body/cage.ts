@@ -14,7 +14,7 @@ export const TAGS = [
   'glass_fl', 'glass_fr', 'glass_rl', 'glass_rr',
   'windshield', 'window_r', 'bumper_f', 'bumper_r',
   'headlight_l', 'headlight_r', 'taillight_l', 'taillight_r',
-  'grille', 'intake', 'plate_r',
+  'grille', 'intake', 'plate_r', 'garnish_r',
 ] as const;
 export type Tag = (typeof TAGS)[number];
 export const TAG_ID = Object.fromEntries(TAGS.map((t, i) => [t, i])) as Record<Tag, number>;
@@ -306,7 +306,7 @@ function rearTag(a: Col, b: Col, r: number): Tag {
   const ca = a.side === 'B' ? a.c : 8, cb = b.side === 'B' ? b.c : 8;
   const lo = Math.min(ca <= 4 ? ca : 8 - ca, cb <= 4 ? cb : 8 - cb);
   const lr = ca + cb < 8 ? 'l' : 'r';
-  if (r === 3) return lo <= 1 ? (`taillight_${lr}` as Tag) : 'trunk';
+  if (r === 3) return lo <= 1 ? (`taillight_${lr}` as Tag) : 'garnish_r';
   if (r === 2) return lo <= 1 ? 'bumper_r' : lo === 3 ? 'plate_r' : 'trunk';
   return 'bumper_r';
 }

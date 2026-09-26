@@ -46,7 +46,7 @@ function rimGeo(): BufferGeometry {
  * concave dish, every window closed by side walls so the spokes have real depth.
  */
 function castFace(xo: number): BufferGeometry {
-  const NA = 150, NR = 14;
+  const NA = 260, NR = 18;
   const r0 = 0.03, r1 = RIM - 0.008;
   const radius = (i: number) => r0 + ((r1 - r0) * i) / NR;
   const depth = (r: number) => xo - 0.058 + 0.05 * Math.sqrt((r - r0) / (r1 - r0)); // face plane (concave)

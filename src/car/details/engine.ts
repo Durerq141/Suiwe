@@ -9,6 +9,9 @@ const add = (r: RoleGeo, role: string, ...g: BufferGeometry[]) => { (r[role] ??=
 
 const EX = -0.04; // engine centre x (gearbox sits on the driver side)
 const EZ = 1.46;
+/** Interaction points used by the game (oil filler, radiator filler). */
+export const OIL_CAP: P3 = [0.12, 0.8, 1.28];
+export const RAD_CAP: P3 = [0.24, 0.88, 2.04];
 
 function engine(): RoleGeo {
   const r: RoleGeo = {};
@@ -49,7 +52,7 @@ function engine(): RoleGeo {
   // gearbox bolted to the driver end
   add(r, 'engine', rbox(0.26, 0.28, 0.32, 0.05, EX + 0.39, 0.45, EZ - 0.04));
   add(r, 'engine', lathe([[0.16, 0], [0.17, 0.03], [0.14, 0.08], [0.02, 0.1]], [EX + 0.26, 0.45, EZ - 0.04], [EX + 0.6, 0.45, EZ - 0.04], 28));
-  add(r, 'capYellow', cyl([EX + 0.08, 0.86, EZ - 0.15], [EX + 0.08, 0.88, EZ - 0.15], 0.018, 0.018, 12));
+  add(r, 'capYellow', cyl([OIL_CAP[0], OIL_CAP[1] - 0.03, OIL_CAP[2]], [OIL_CAP[0], OIL_CAP[1], OIL_CAP[2]], 0.022, 0.022, 16));
   add(r, 'capYellow', cyl([EX - 0.12, 0.78, EZ + 0.19], [EX - 0.12, 0.9, EZ + 0.26], 0.007, 0.007, 8));
   return r;
 }
@@ -85,6 +88,8 @@ function radiator(): RoleGeo {
     }
     add(r, 'engine', cyl([x, 0.6, z - 0.1], [x, 0.6, z - 0.07], 0.045, 0.045, 20));
   }
+  add(r, 'chrome', cyl([RAD_CAP[0], RAD_CAP[1] - 0.04, RAD_CAP[2]], [RAD_CAP[0], RAD_CAP[1], RAD_CAP[2]], 0.026, 0.026, 18));
+  add(r, 'engineDark', cyl([RAD_CAP[0], 0.83, RAD_CAP[2]], [RAD_CAP[0], RAD_CAP[1] - 0.035, RAD_CAP[2]], 0.02, 0.02, 12));
   add(r, 'hose', tube([[-0.42, 0.8, z - 0.04], [-0.35, 0.82, z - 0.2], [-0.25, 0.8, 1.72], [-0.15, 0.76, 1.66]], 0.022, 10));
   add(r, 'hose', tube([[0.42, 0.42, z - 0.04], [0.36, 0.4, 1.8], [0.3, 0.42, 1.6]], 0.022, 10));
   return r;
