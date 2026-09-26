@@ -23,28 +23,28 @@ export const TAG_ID = Object.fromEntries(TAGS.map((t, i) => [t, i])) as Record<T
 export const Z = [
   2.27, 2.08, // 0 front corner, 1 headlight rear
   1.9, 1.76, 1.58, 1.45, 1.32, 1.14, 1.0, // 2..8 front arch
-  0.855, 0.55, 0.21, // 9 cowl, 10 windshield mid, 11 roof front
-  -0.05, -0.3, -0.385, -0.47, -0.8, // 12..16 cabin, door split at 14
-  -1.0, -1.14, -1.28, -1.45, -1.58, -1.76, -1.9, // 17..23 rear arch
-  -2.22, -2.52, -2.72, // 24 deck, 25 tail, 26 rear corner
+  0.9, 0.5, 0.1, // 9 cowl, 10 windshield mid, 11 roof front
+  -0.13, -0.33, -0.4, -0.48, -0.8, // 12..16 cabin, door split at 14
+  -1.0, -1.16, -1.34, -1.45, -1.58, -1.76, -1.9, // 17..23 rear arch
+  -2.12, -2.5, -2.72, // 24 deck front, 25 tail, 26 rear corner
 ] as const;
 const N = Z.length;
 const F = 9; // top-grid columns: c0 belt, c1 glass top / seam, c2 rail, c3 mid, c4 centre, mirrored
 
-const J = { cowl: 9, wsMid: 10, roofF: 11, bFront: 13, split: 14, bRear: 15, archR0: 17, cStart: 18, rwTop: 19, axleR: 20, deck: 23, tail: 25 } as const;
+const J = { cowl: 9, wsMid: 10, roofF: 11, bFront: 13, split: 14, bRear: 15, archR0: 17, cStart: 18, rwTop: 19, axleR: 20, deck: 24, tail: 25 } as const;
 const FRONT_ARCH = [2, 8] as const;
 const REAR_ARCH = [17, 23] as const;
 
 // ------------------------------------------------------------------ design lines
-const beltY = curve([[2.27, 0.848], [2.08, 0.872], [1.45, 0.93], [0.855, 0.99], [0.21, 1.004], [-0.385, 1.018], [-1.28, 1.042], [-1.9, 1.06], [-2.52, 1.062], [-2.72, 1.05]]);
-const beltX = curve([[2.27, 0.8], [2.08, 0.872], [1.45, 0.9], [0.855, 0.892], [-0.385, 0.884], [-1.45, 0.894], [-1.9, 0.892], [-2.52, 0.868], [-2.72, 0.8]]);
-const sideX = curve([[2.27, 0.842], [2.08, 0.918], [1.45, 0.962], [0.855, 0.951], [-0.385, 0.953], [-1.45, 0.963], [-2.22, 0.945], [-2.52, 0.905], [-2.72, 0.845]]);
+const beltY = curve([[2.27, 0.83], [2.08, 0.862], [1.45, 0.93], [0.9, 0.985], [0.1, 1.0], [-0.4, 1.016], [-1.34, 1.05], [-2.12, 1.07], [-2.5, 1.072], [-2.72, 1.06]]);
+const beltX = curve([[2.27, 0.78], [2.08, 0.862], [1.45, 0.898], [0.9, 0.89], [-0.4, 0.882], [-1.45, 0.892], [-2.12, 0.884], [-2.5, 0.858], [-2.72, 0.79]]);
+const sideX = curve([[2.27, 0.83], [2.08, 0.912], [1.45, 0.962], [0.9, 0.951], [-0.4, 0.953], [-1.45, 0.964], [-2.12, 0.948], [-2.5, 0.908], [-2.72, 0.84]]);
 const row0Y = curve([[2.27, 0.25], [1.9, 0.262], [1.0, 0.232], [-1.0, 0.232], [-1.9, 0.28], [-2.72, 0.3]]);
 const row1Y = curve([[2.27, 0.39], [1.9, 0.4], [1.0, 0.33], [-1.0, 0.33], [-1.9, 0.43], [-2.72, 0.45]]);
-const row3Y = curve([[2.27, 0.715], [2.08, 0.745], [1.45, 0.83], [0.855, 0.86], [-0.385, 0.875], [-1.45, 0.895], [-1.9, 0.9], [-2.52, 0.875], [-2.72, 0.862]]);
-const hoodY = curve([[2.3, 0.866], [1.9, 0.908], [1.45, 0.946], [1.0, 0.978], [0.855, 0.99]]);
-const roofY = curve([[0.21, 1.428], [-0.05, 1.472], [-0.385, 1.49], [-0.8, 1.486], [-1.14, 1.463], [-1.28, 1.442]]);
-const deckY = curve([[-1.9, 1.074], [-2.22, 1.082], [-2.52, 1.078], [-2.72, 1.062]]);
+const row3Y = curve([[2.27, 0.7], [2.08, 0.735], [1.45, 0.83], [0.9, 0.862], [-0.4, 0.878], [-1.45, 0.9], [-2.12, 0.905], [-2.5, 0.88], [-2.72, 0.868]]);
+const hoodY = curve([[2.3, 0.852], [1.9, 0.9], [1.45, 0.944], [1.0, 0.978], [0.9, 0.988]]);
+const roofY = curve([[0.1, 1.418], [-0.13, 1.466], [-0.4, 1.49], [-0.8, 1.488], [-1.16, 1.466], [-1.34, 1.435]]);
+const deckY = curve([[-2.12, 1.078], [-2.5, 1.088], [-2.72, 1.082]]);
 
 // top-grid column half-widths per region (c1, c2, c3)
 function topX(j: number): [number, number, number] {
@@ -76,7 +76,7 @@ function topY(j: number, c: number): number {
     return y - fall[c] + (c === 2 ? 0.004 : 0); // subtle power-bulge line along c2
   }
   if (j <= J.roofF) {
-    const yc = j === J.cowl ? 0.99 : j === J.wsMid ? 1.214 : 1.428;
+    const yc = j === J.cowl ? 0.988 : j === J.wsMid ? 1.222 : 1.418;
     fall[1] = j === J.roofF ? 0.075 : 0.02; fall[2] = j === J.roofF ? 0.03 : 0.012; fall[3] = 0.008;
     return yc - fall[c];
   }
@@ -86,7 +86,7 @@ function topY(j: number, c: number): number {
   }
   if (j <= J.deck) {
     const t = (j - J.rwTop) / (J.deck - J.rwTop);
-    const yc = lerp(1.442, 1.074, Math.pow(t, 0.92));
+    const yc = lerp(1.435, 1.078, Math.pow(t, 1.08));
     fall[1] = lerp(0.1, 0.03, t); fall[2] = lerp(0.035, 0.012, t); fall[3] = 0.008;
     return yc - fall[c];
   }
@@ -201,8 +201,9 @@ export function buildBodyCage(): BodyCage {
 
 /** Five surface points (bottom -> top) for one band column. */
 function bandColumn(col: { side: 'F' | 'L' | 'B' | 'R'; j: number; c: number }, top: number[][]): number[][] {
-  if (col.side === 'F' || col.side === 'B') return endColumn(col.side, col.c, top);
-  const s = col.side === 'L' ? 1 : -1;
+  // the loop's end rows start/finish on a corner cell; corners are side columns
+  if ((col.side === 'F' || col.side === 'B') && col.c !== 0 && col.c !== 8) return endColumn(col.side, col.c, top);
+  const s = col.side === 'L' || col.c === 0 ? 1 : -1;
   const j = col.j;
   const z = Z[j];
   const sx = sideX(z);
@@ -224,7 +225,7 @@ function bandColumn(col: { side: 'F' | 'L' | 'B' | 'R'; j: number; c: number }, 
   let z0 = z, z1 = z, z2 = z, z3 = z, z4 = z;
   if (j === 0 || j === N - 1) {
     const dir = j === 0 ? 1 : -1;
-    const push = j === 0 ? [0.035, 0.07, 0.075, 0.055, 0] : [0.03, 0.06, 0.065, 0.045, 0];
+    const push = j === 0 ? [0.03, 0.062, 0.066, 0.045, 0] : [0.02, 0.045, 0.05, 0.035, 0];
     z0 += dir * push[0]; z1 += dir * push[1]; z2 += dir * push[2]; z3 += dir * push[3]; z4 += dir * push[4];
   }
   return [
