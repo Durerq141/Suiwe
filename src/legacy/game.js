@@ -4309,6 +4309,8 @@ function IQ(B, A) {
       return I.tire;
     case "rim":
       return C("rim", () => lI({ color: 1842463, roughness: 0.38, metalness: 0.5, side: OI }));
+    case "rimAlloy":
+      return C("rimAlloy", () => lI({ color: 12107462, roughness: 0.3, metalness: 0.9, side: OI }));
     case "disc":
       return C("disc", () => lI({ color: 7828076, roughness: 0.55, metalness: 0.8 }));
     case "caliper":

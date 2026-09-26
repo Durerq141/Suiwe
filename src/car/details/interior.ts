@@ -77,7 +77,8 @@ function steeringWheel(): { wheel: RoleGeo; fixed: RoleGeo } {
   }
   add(wheel, 'wheelSpoke', rbox(0.16, 0.125, 0.05, 0.04, 0, -0.006, 0.012));
   add(wheel, 'wheelRim', rbox(0.14, 0.105, 0.02, 0.04, 0, -0.006, 0.04));
-  add(wheel, 'chrome', cyl([0, 0.0, 0.049], [0, 0.0, 0.052], 0.017, 0.017, 24));
+  add(wheel, 'switch', cyl([0, 0.0, 0.049], [0, 0.0, 0.052], 0.019, 0.019, 24));
+  add(wheel, 'knob', cyl([0, 0.0, 0.052], [0, 0.0, 0.0535], 0.012, 0.012, 24));
   for (const s of [1, -1]) add(wheel, 'switch', rbox(0.03, 0.022, 0.008, 0.004, 0.095 * s, 0.01, 0.004));
   add(fixed, 'trim', rbox(0.1, 0.085, 0.3, 0.03, 0, -0.012, -0.2));
   add(fixed, 'trim', cyl([0, 0, -0.06], [0, 0, -0.03], 0.048, 0.045, 24));

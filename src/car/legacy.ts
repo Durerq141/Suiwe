@@ -27,6 +27,10 @@ const ROLE: Record<string, string> = {
   satin: 'chrome',
   rimDark: 'rim',
   amber: 'indicator',
+  spring: 'susp',
+  grilleBack: 'grille',
+  grilleBar: 'chrome',
+  badgeBlue: 'chrome',
 };
 
 function toGame(src: RoleGeo, skip: readonly string[] = []): Record<string, BufferGeometry[]> {
@@ -55,7 +59,7 @@ const wheelLocal = (() => {
 export function legacyPart(name: string): Record<string, BufferGeometry[]> | null {
   if (name.startsWith('wheel_')) {
     const w = wheelLocal();
-    return { tire: [w.tire], rim: [w.rim], chrome: [w.hub] };
+    return { tire: [w.tire], rimAlloy: [w.rim], chrome: [w.hub] };
   }
   const p = car().parts[name];
   return p ? toGame(p) : null;
