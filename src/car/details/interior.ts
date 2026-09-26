@@ -1,9 +1,13 @@
 // Cabin: dashboard with instrument binnacle and centre stack, console, front buckets,
 // rear bench, door cards, headliner trims, visors, mirror, pedals, steering wheel.
 // Anchors (cluster, column, radio, gear lever) match the game's gauge/control code.
-import { type BufferGeometry, Matrix4, TorusGeometry, Vector3 } from 'three';
+import { type BufferGeometry, Matrix4, PlaneGeometry, TorusGeometry, Vector3 } from 'three';
 import { DIMS } from '../dims';
-import { box, cyl, grid, mirrorX, rbox, tube, type P3 } from '../mesh/prims';
+import { box, cyl, fan, grid, rbox, tube, type P3 } from '../mesh/prims';
+import { bodySkin, skinGeometry } from '../body/skin';
+import { fromSide, fromTop } from '../body/surface';
+import { frameMatrix } from './trim';
+import { boundaryLoops } from '../mesh/solidify';
 
 export type RoleGeo = Record<string, BufferGeometry[]>;
 const add = (r: RoleGeo, role: string, ...g: BufferGeometry[]) => { (r[role] ??= []).push(...g); };
@@ -21,13 +25,13 @@ export const ANCHORS = {
 const smoothstep = (a: number, b: number, x: number) => { const t = Math.min(1, Math.max(0, (x - a) / (b - a))); return t * t * (3 - 2 * t); };
 
 /** Dashboard shell: a loft of (z, y) sections across the cabin width. */
-function dashboard(): BufferGeometry {
+function dashboard(): BufferGeometry[] {
   const rows: P3[][] = [];
   const n = 34;
   for (let i = 0; i <= n; i++) {
-    const x = -0.86 + (1.72 * i) / n;
+    const x = -DASH_W + (2 * DASH_W * i) / n;
     const ax = Math.abs(x);
-    const top = 1.012 + 0.014 * (1 - (ax / 0.86) ** 2);
+    const top = 1.012 + 0.014 * (1 - (ax / DASH_W) ** 2);
     // driver binnacle pocket and passenger-side wave
     const w = 1 - smoothstep(0.1, 0.19, Math.abs(x - 0.42));
     const sec: [number, number][] = [
@@ -47,7 +51,18 @@ function dashboard(): BufferGeometry {
     ];
     rows.push(sec.map(([z, y]) => [x, y, z] as P3));
   }
-  return grid(rows, false, true);
+  // end caps against the door cards
+  return [grid(rows, false, true), fan(rows[0], true), fan(rows[rows.length - 1])];
+}
+const DASH_W = 0.8;
+
+/** Decorative strip across the lower dash face (skips the centre stack). */
+function dashStrip(): BufferGeometry[] {
+  const out: BufferGeometry[] = [];
+  for (const [x0, x1] of [[-DASH_W + 0.02, -0.17], [0.17, DASH_W - 0.02]] as const) {
+    out.push(rbox(x1 - x0, 0.032, 0.012, 0.005, (x0 + x1) / 2, 0.815, 0.392));
+  }
+  return out;
 }
 
 function steeringWheel(): { wheel: RoleGeo; fixed: RoleGeo } {
@@ -60,8 +75,9 @@ function steeringWheel(): { wheel: RoleGeo; fixed: RoleGeo } {
     g.translate(Math.cos(a) * (0.183 - len / 2), Math.sin(a) * (0.183 - len / 2) - 0.004, -0.008);
     add(wheel, 'wheelSpoke', g);
   }
-  add(wheel, 'wheelSpoke', rbox(0.15, 0.115, 0.055, 0.028, 0, -0.006, 0.014));
-  add(wheel, 'chrome', cyl([0, 0.004, 0.041], [0, 0.004, 0.044], 0.018, 0.018, 24));
+  add(wheel, 'wheelSpoke', rbox(0.16, 0.125, 0.05, 0.04, 0, -0.006, 0.012));
+  add(wheel, 'wheelRim', rbox(0.14, 0.105, 0.02, 0.04, 0, -0.006, 0.04));
+  add(wheel, 'chrome', cyl([0, 0.0, 0.049], [0, 0.0, 0.052], 0.017, 0.017, 24));
   for (const s of [1, -1]) add(wheel, 'switch', rbox(0.03, 0.022, 0.008, 0.004, 0.095 * s, 0.01, 0.004));
   add(fixed, 'trim', rbox(0.1, 0.085, 0.3, 0.03, 0, -0.012, -0.2));
   add(fixed, 'trim', cyl([0, 0, -0.06], [0, 0, -0.03], 0.048, 0.045, 24));
@@ -112,33 +128,51 @@ export function rearSeat(): RoleGeo {
   return r;
 }
 
-export function doorCard(part: 'door_fl' | 'door_fr' | 'door_rl' | 'door_rr'): RoleGeo {
+/** Door card: the door skin offset inside the door shell, plus handle, armrest, switches, speaker, pocket. */
+export function doorCard(tag: 'door_fl' | 'door_rl'): RoleGeo {
   const r: RoleGeo = {};
-  const front = part === 'door_fl' || part === 'door_fr';
-  const z0 = front ? DIMS.zCowl - 0.05 : DIMS.zDoorSplit - 0.07;
-  const z1 = front ? DIMS.zDoorSplit + 0.06 : -1.36;
-  const zc = (z0 + z1) / 2, len = z0 - z1;
-  const x = 0.865;
-  const p = (b: BufferGeometry, role: string) => add(r, role, b);
-  p(rbox(0.05, 0.56, len, 0.02, x, 0.66, zc), 'trim');
-  p(rbox(0.035, 0.1, len - 0.02, 0.02, x - 0.02, 0.985, zc), 'dashSoft');
-  p(rbox(0.07, 0.05, len * 0.55, 0.02, x - 0.045, 0.73, zc - len * 0.08), 'dashSoft');
-  p(rbox(0.02, 0.2, len * 0.62, 0.01, x - 0.03, 0.84, zc - len * 0.05), 'seatInsert');
-  p(cyl([x - 0.028, 0.5, zc + len * 0.18], [x - 0.03, 0.5, zc + len * 0.18], 0.075, 0.075, 28), 'black');
-  p(rbox(0.012, 0.03, 0.09, 0.008, x - 0.035, 0.9, z0 - 0.12), 'chrome');
-  if (front) p(rbox(0.04, 0.015, 0.1, 0.006, x - 0.08, 0.758, zc - 0.05), 'switch');
-  if (part.endsWith('r')) {
-    const out: RoleGeo = {};
-    for (const [role, list] of Object.entries(r)) out[role] = list.map((b) => mirrorX(b));
-    return out;
+  const skin = bodySkin();
+  const D = 0.108;
+  add(r, 'trim', skinGeometry(skin, [tag], { offset: -D, flip: true }));
+  const front = tag === 'door_fl';
+  const zf = front ? DIMS.zCowl - 0.08 : DIMS.zDoorSplit - 0.1;
+  const zr = front ? DIMS.zDoorSplit + 0.08 : -1.12;
+  const zm = (zf + zr) / 2, len = zf - zr;
+  const put = (role: string, g: BufferGeometry, z: number, y: number) => {
+    const h = fromSide(1, z, y, [tag]);
+    if (h) add(r, role, g.applyMatrix4(frameMatrix(h)));
+  };
+  // local frame: Z outward (card face at Z = -D), X rearwards, Y up
+  put('armrest', rbox(len * 0.62, 0.05, 0.075, 0.02, 0, 0, -D - 0.03), zm - len * 0.05, 0.72);
+  put('dashSoft', rbox(len * 0.55, 0.12, 0.03, 0.02, 0, 0, -D - 0.008), zm - len * 0.05, 0.8);
+  put('seatInsert', rbox(len * 0.62, 0.17, 0.012, 0.01, 0, 0, -D - 0.004), zm, 0.87);
+  put('chrome', rbox(0.1, 0.028, 0.012, 0.008, 0, 0, -D - 0.012), zf - 0.12, 0.885);
+  put('black', rbox(0.13, 0.05, 0.014, 0.012, 0, 0, -D - 0.004), zf - 0.12, 0.885);
+  put('black', cyl([0, 0, -D - 0.002], [0, 0, -D - 0.012], 0.068, 0.068, 28), zf - 0.13, 0.49);
+  put('dashSoft', rbox(len * 0.5, 0.11, 0.045, 0.015, 0, 0, -D - 0.022), zm - len * 0.12, 0.43);
+  if (front) {
+    put('switch', rbox(0.12, 0.014, 0.05, 0.006, 0, 0, -D - 0.045), zm + len * 0.18, 0.75);
+    put('dashSoft', rbox(0.12, 0.06, 0.03, 0.012, 0, 0, -D - 0.01), zf - 0.05, 0.97);
   }
+  // window-sill cap along the door top
+  const loops = boundaryLoops(skin.mesh, skin.facesByTag.get(tag) ?? []);
+  const loop = loops.sort((a, b) => b.length - a.length)[0] ?? [];
+  const pts = loop.map((v) => new Vector3(skin.mesh.pos[v * 3], skin.mesh.pos[v * 3 + 1], skin.mesh.pos[v * 3 + 2]));
+  const maxY = Math.max(...pts.map((p) => p.y));
+  const cap: P3[] = [];
+  for (const p of pts.filter((q) => q.y > maxY - 0.04 && q.z < zf + 0.05 && q.z > zr - 0.2).sort((a, b) => b.z - a.z)) {
+    const h = fromSide(1, p.z, p.y - 0.03, [tag]);
+    if (h) { const q = h.p.clone().addScaledVector(h.n, -0.075); cap.push([q.x, q.y + 0.012, q.z]); }
+  }
+  if (cap.length > 2) add(r, 'dashSoft', tube(cap, 0.02, 8));
   return r;
 }
 
 /** Everything bolted to the body shell inside the cabin. */
 export function cabin(opts: { steering?: boolean } = {}): RoleGeo {
   const r: RoleGeo = {};
-  add(r, 'dash', dashboard());
+  add(r, 'dash', ...dashboard());
+  add(r, 'wood', ...dashStrip());
   // binnacle hood over the cluster
   const hood: P3[][] = [];
   for (let i = 0; i <= 16; i++) {
@@ -149,7 +183,7 @@ export function cabin(opts: { steering?: boolean } = {}): RoleGeo {
   add(r, 'dashSoft', grid(hood.map((h) => h), false, false));
   add(r, 'gauge', box(0.34, 0.14, 0.02, 0.42, 0.995, 0.475, 0.18));
   // centre stack with screen, vents and climate controls
-  add(r, 'dashSoft', rbox(0.32, 0.42, 0.12, 0.03, 0, 0.8, 0.355, 0.18));
+  add(r, 'dashSoft', rbox(0.32, 0.46, 0.12, 0.03, 0, 0.78, 0.36, 0.18));
   add(r, 'blackGloss', rbox(0.25, 0.3, 0.02, 0.012, 0, 0.815, 0.29, 0.18));
   add(r, 'screen', box(0.19, 0.105, 0.004, 0, 0.87, 0.278, 0.18));
   for (const s of [1, -1]) {
@@ -162,20 +196,49 @@ export function cabin(opts: { steering?: boolean } = {}): RoleGeo {
   add(r, 'console', rbox(0.26, 0.26, 0.62, 0.03, 0, DIMS.yFloor + 0.13, 0.02), rbox(0.26, 0.34, 0.42, 0.035, 0, DIMS.yFloor + 0.16, -0.43));
   add(r, 'armrest', rbox(0.25, 0.045, 0.38, 0.02, 0, DIMS.yFloor + 0.34, -0.43));
   add(r, 'black', rbox(0.1, 0.006, 0.2, 0.004, ANCHORS.gearLever.x, ANCHORS.gearLever.y - 0.002, ANCHORS.gearLever.z));
+  for (const z of [-0.02, -0.11]) add(r, 'black', cyl([-0.058, 0.565, z], [-0.058, 0.56, z], 0.037, 0.037, 24), new TorusGeometry(0.038, 0.004, 6, 24).rotateX(Math.PI / 2).translate(-0.058, 0.566, z));
   // glovebox face line, passenger knee panel
   add(r, 'dashSoft', rbox(0.38, 0.14, 0.03, 0.02, -0.44, 0.775, 0.415, 0.3));
-  // pillars, visors, mirror, pedals
+  // visors, mirror and dome light pressed against the headliner / glass
   for (const s of [1, -1]) {
-    add(r, 'headliner', rbox(0.36, 0.014, 0.17, 0.006, 0.38 * s, 1.375, 0.13, 0.28));
-    add(r, 'black', rbox(0.05, 0.3, 0.06, 0.02, 0.84 * s, 1.18, -0.4, 0, 0, 0.18 * s));
+    const h = fromTop(0.36 * s, 0.02, ['roof', 'aPillar', 'windshield']);
+    if (!h) continue;
+    const y = h.p.y - 0.03 - 0.012;
+    add(r, 'headliner', rbox(0.38, 0.018, 0.17, 0.008, 0.36 * s, y, -0.02, 0.2));
+    add(r, 'black', cyl([0.13 * s, y + 0.004, 0.06], [0.55 * s, y + 0.004, 0.06], 0.006, 0.006, 8));
   }
-  add(r, 'black', rbox(0.24, 0.065, 0.03, 0.02, 0, 1.3, 0.18, 0.2));
-  add(r, 'mirror', box(0.22, 0.05, 0.004, 0, 1.3, 0.164, 0.2));
-  add(r, 'black', cyl([0, 1.33, 0.19], [0, 1.37, 0.2], 0.008, 0.01, 8));
-  add(r, 'rubber', rbox(0.07, 0.1, 0.012, 0.005, 0.36, 0.43, 0.62, -0.6), rbox(0.05, 0.13, 0.012, 0.005, 0.52, 0.44, 0.64, -0.5));
-  add(r, 'dome', rbox(0.16, 0.02, 0.08, 0.01, ANCHORS.dome.x, ANCHORS.dome.y + 0.01, ANCHORS.dome.z));
-  // steering wheel + column (static copy for previews; the game animates its own)
+  const mh = fromTop(0, 0.2, ['windshield']);
+  if (mh) {
+    const b = mh.p.clone().addScaledVector(mh.n, -0.008);
+    add(r, 'black', rbox(0.05, 0.016, 0.07, 0.006, b.x, b.y - 0.006, b.z, 0.5));
+    add(r, 'black', cyl([b.x, b.y - 0.01, b.z - 0.01], [b.x, b.y - 0.07, b.z - 0.03], 0.007, 0.007, 8));
+    add(r, 'black', rbox(0.26, 0.07, 0.035, 0.02, b.x, b.y - 0.1, b.z - 0.045, 0.12));
+    add(r, 'mirror', rbox(0.24, 0.055, 0.004, 0.015, b.x, b.y - 0.1, b.z - 0.064, 0.12));
+  }
+  const dh = fromTop(0, -0.36, ['roof']);
+  if (dh) {
+    add(r, 'headliner', rbox(0.26, 0.022, 0.14, 0.01, 0, dh.p.y - 0.03 - 0.01, -0.36));
+    add(r, 'dome', rbox(0.16, 0.012, 0.07, 0.005, 0, dh.p.y - 0.03 - 0.022, -0.36));
+  }
+  // pedal box: arms from under the dash
+  for (const [x, w, h, y, z] of [[0.33, 0.07, 0.1, 0.43, 0.63], [0.5, 0.05, 0.13, 0.44, 0.65]] as const) {
+    add(r, 'rubber', rbox(w, h, 0.014, 0.005, x, y, z, -0.55));
+    add(r, 'black', cyl([x, y + h * 0.4, z + 0.02], [x, 0.66, 0.74], 0.008, 0.008, 8));
+  }
+  add(r, 'black', rbox(0.3, 0.06, 0.1, 0.02, 0.42, 0.68, 0.76));
+  // steering wheel, gauges, shifter, handbrake: static copies for previews (the game animates its own)
   if (opts.steering === false) return r;
+  const c = ANCHORS.cluster, o = c.top.clone().add(c.bottom).multiplyScalar(0.5);
+  const face = new PlaneGeometry(0.3, 0.1);
+  face.applyMatrix4(new Matrix4().lookAt(new Vector3(), new Vector3(0, 0.179, -0.984), new Vector3(0, 1, 0)));
+  face.translate(o.x, o.y + 0.001, o.z - 0.004);
+  add(r, 'gaugeFace', face);
+  const g = ANCHORS.gearLever;
+  add(r, 'rubber', cyl([g.x, g.y, g.z], [g.x, g.y + 0.06, g.z], 0.035, 0.015, 16));
+  add(r, 'chrome', cyl([g.x, g.y + 0.05, g.z], [g.x, g.y + 0.1, g.z], 0.007, 0.007, 8));
+  add(r, 'knob', rbox(0.045, 0.065, 0.06, 0.02, g.x, g.y + 0.13, g.z + 0.008, 0.2));
+  const hb = ANCHORS.handbrake;
+  add(r, 'trim', rbox(0.034, 0.03, 0.2, 0.012, hb.x, hb.y + 0.01, hb.z + 0.1), rbox(0.036, 0.034, 0.08, 0.014, hb.x, hb.y + 0.012, hb.z + 0.19));
   const sw = steeringWheel();
   const m = steeringMatrix();
   for (const src of [sw.wheel, sw.fixed]) for (const [role, list] of Object.entries(src)) add(r, role, ...list.map((b) => b.clone().applyMatrix4(m)));

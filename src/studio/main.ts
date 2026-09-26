@@ -4,7 +4,7 @@
 //   /studio.html?view=orbit            free orbit
 //   /studio.html?view=holes            see-through / gap detector
 import {
-  ACESFilmicToneMapping, AmbientLight, Color, DirectionalLight, Mesh, MeshBasicMaterial, PCFSoftShadowMap, PerspectiveCamera,
+  ACESFilmicToneMapping, AmbientLight, Color, DirectionalLight, Mesh, MeshBasicMaterial, PCFShadowMap, PerspectiveCamera,
   PlaneGeometry, PMREMGenerator, Scene, ShadowMaterial, SRGBColorSpace, Vector3, WebGLRenderer, type Object3D,
 } from 'three';
 import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
@@ -23,13 +23,14 @@ renderer.outputColorSpace = SRGBColorSpace;
 renderer.toneMapping = ACESFilmicToneMapping;
 renderer.toneMappingExposure = 1.0;
 renderer.shadowMap.enabled = true;
-renderer.shadowMap.type = PCFSoftShadowMap;
+renderer.shadowMap.type = PCFShadowMap;
 document.body.appendChild(renderer.domElement);
 
 const scene = new Scene();
-scene.background = new Color('#ecebe8');
+scene.background = new Color('#f4f4f2');
 const pmrem = new PMREMGenerator(renderer);
 scene.environment = pmrem.fromScene(new RoomEnvironment(), 0.04).texture;
+scene.environmentIntensity = 1.25;
 scene.add(new AmbientLight(0xffffff, 0.15));
 const sun = new DirectionalLight(0xffffff, 1.6);
 sun.position.set(3, 8, 4);
@@ -44,7 +45,7 @@ ground.receiveShadow = true;
 scene.add(ground);
 
 const t0 = performance.now();
-const mats = studioMaterials(params.get('paint') ?? '#7d1a20');
+const mats = studioMaterials(params.get('paint') ?? '#b9a58f');
 const car = buildCarModel(mats);
 scene.add(car.root);
 const buildMs = performance.now() - t0;
@@ -71,6 +72,17 @@ const SHOTS: Shot[] = [
   { label: 'Торпеда', pos: [0.22, 1.2, -0.95], look: [0.12, 0.95, 0.7], fov: 68, hide: ['seat_d', 'seat_p'] },
   { label: 'Салон сзади', pos: [-0.32, 1.22, 0.32], look: [0.12, 0.74, -1.3], fov: 70 },
   { label: 'Моторный отсек', pos: [0, 2.35, 3.75], look: [0, 0.62, 1.45], fov: 42, open: ['hood'] },
+  // 6.. critique close-ups
+  { label: 'Перед', pos: [0, 0.9, 7.5], look: [0, 0.65, 0], fov: 22 },
+  { label: 'Зад', pos: [0, 1.0, -8], look: [0, 0.7, 0], fov: 22 },
+  { label: 'Морда крупно', pos: [1.6, 0.95, 3.9], look: [0.2, 0.62, 2.1], fov: 34 },
+  { label: 'Корма крупно', pos: [1.7, 1.1, -4.6], look: [0.2, 0.75, -2.5], fov: 34 },
+  { label: 'Дверь открыта', pos: [3.2, 1.35, 0.9], look: [0.3, 0.8, -0.3], fov: 50, open: ['door_fl', 'door_rl'] },
+  { label: 'Сверху', pos: [0.01, 9, -0.2], look: [0, 0, -0.2], fov: 32 },
+  { label: 'Снизу', pos: [3.5, -2.2, 0.5], look: [0, 0.3, -0.1], fov: 45 },
+  { label: 'Багажник', pos: [0.9, 1.9, -4.4], look: [0, 0.7, -2.2], fov: 42, open: ['trunk'] },
+  { label: 'Колесо', pos: [1.9, 0.5, 2.2], look: [0.8, 0.36, 1.45], fov: 30 },
+  { label: 'Зеркало', pos: [1.7, 1.25, 1.2], look: [0.95, 1.05, 0.55], fov: 30 },
 ];
 
 const camera = new PerspectiveCamera(35, innerWidth / innerHeight, 0.02, 200);

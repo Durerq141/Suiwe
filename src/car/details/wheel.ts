@@ -1,8 +1,8 @@
 // 17" five-double-spoke alloy on a 235/55 R17 tyre, plus a ventilated disc and caliper.
 // Built for the left side: axle along +x (outer face towards +x), centred at the origin.
-import type { BufferGeometry } from 'three';
+import { BufferGeometry, Float32BufferAttribute } from 'three';
 import { DIMS } from '../dims';
-import { cyl, grid, lathe, merge, rbox, type P3 } from '../mesh/prims';
+import { cyl, lathe, merge, rbox, type P3 } from '../mesh/prims';
 
 export interface WheelGeo {
   tire: BufferGeometry;
@@ -38,36 +38,52 @@ function rimGeo(): BufferGeometry {
     [RIM - 0.012, 0.02], [RIM - 0.006, 0.03], [RIM - 0.028, 0.06], [RIM - 0.03, W - 0.07], [RIM - 0.01, W - 0.035],
     [RIM + 0.004, W - 0.022], [RIM + 0.012, W - 0.012], [RIM + 0.006, W - 0.004], [RIM - 0.012, W - 0.006], [RIM - 0.03, W - 0.02],
   ], [-W / 2, 0, 0], [-W / 2 + 1, 0, 0], 72);
-  const parts: BufferGeometry[] = [barrel];
-  // hub face
-  parts.push(lathe([[0.001, 0], [0.058, 0], [0.078, -0.006], [0.084, -0.02], [0.084, -0.04]].map(([r, h]) => [r, h] as [number, number]), [xo - 0.042, 0, 0], [xo - 0.042 - 1, 0, 0], 40));
-  // five double spokes, concave: hub end sits deeper than the lip end
-  for (let i = 0; i < 5; i++) {
-    for (const off of [-0.105, 0.105]) {
-      const a = (i / 5) * Math.PI * 2 + off;
-      parts.push(spoke(a, off > 0 ? 1 : -1, xo));
-    }
-  }
-  return merge(parts);
+  return merge([barrel, castFace(xo)]);
 }
 
-function spoke(a: number, lean: number, xo: number): BufferGeometry {
-  // cross-section rows from hub (r0) to lip (r1); each row: 4 corners of a tapered beam
-  const rows: P3[][] = [];
-  const n = 6;
-  for (let i = 0; i <= n; i++) {
-    const t = i / n;
-    const r = 0.07 + (RIM - 0.075) * t;
-    const halfW = 0.0165 - 0.006 * t;
-    const depth = 0.034 - 0.012 * t;
-    const x = xo - 0.045 + 0.034 * Math.sqrt(t); // concave dish
-    const ang = a + lean * 0.06 * t; // spokes of a pair converge slightly towards the lip
-    const c = Math.cos(ang), s = Math.sin(ang);
-    const tx = -s, ty = c; // tangential
-    const pt = (u: number, d: number): P3 => [x - d, c * r + tx * u, s * r + ty * u];
-    rows.push([pt(-halfW, 0), pt(halfW, 0), pt(halfW * 0.9, depth), pt(-halfW * 0.9, depth)]);
+/**
+ * Cast wheel face on a polar grid: 5 twin spokes, trapezoid windows between them,
+ * concave dish, every window closed by side walls so the spokes have real depth.
+ */
+function castFace(xo: number): BufferGeometry {
+  const NA = 150, NR = 14;
+  const r0 = 0.03, r1 = RIM - 0.008;
+  const radius = (i: number) => r0 + ((r1 - r0) * i) / NR;
+  const depth = (r: number) => xo - 0.058 + 0.05 * Math.sqrt((r - r0) / (r1 - r0)); // face plane (concave)
+  const T = 0.03; // spoke thickness
+  const solid = (ia: number, ir: number) => {
+    const r = radius(ir + 0.5);
+    if (r < 0.088 || r > r1 - 0.014) return true; // hub and lip ring
+    const a = ((ia + 0.5) / NA) * Math.PI * 2;
+    const per = (Math.PI * 2) / 5;
+    const u = (((a % per) + per) % per) - per / 2; // angle from pair centre
+    const t = (r - 0.088) / (r1 - 0.014 - 0.088);
+    const arc = Math.abs(u) * r; // distance from the pair centre along the arc (m)
+    const slot = 0.0035 + 0.004 * (1 - t); // half-slot between the twin spokes
+    const spokeW = 0.021 + 0.014 * t; // each spoke widens towards the lip
+    return arc > slot && arc < slot + spokeW;
+  };
+  const P = (ia: number, ir: number, dx = 0): P3 => {
+    const a = (ia / NA) * Math.PI * 2, r = radius(ir);
+    return [depth(r) + dx, Math.cos(a) * r, Math.sin(a) * r];
+  };
+  const pos: number[] = [];
+  const quad = (a: P3, b: P3, c: P3, d: P3) => { for (const p of [a, b, c, a, c, d]) pos.push(p[0], p[1], p[2]); };
+  for (let ia = 0; ia < NA; ia++) for (let ir = 0; ir < NR; ir++) {
+    if (!solid(ia, ir)) continue;
+    const ia2 = (ia + 1) % NA;
+    quad(P(ia, ir), P(ia, ir + 1), P(ia2, ir + 1), P(ia2, ir));
+    quad(P(ia, ir, -T), P(ia2, ir, -T), P(ia2, ir + 1, -T), P(ia, ir + 1, -T));
+    // walls towards open neighbours
+    if (!solid((ia - 1 + NA) % NA, ir)) quad(P(ia, ir), P(ia, ir, -T), P(ia, ir + 1, -T), P(ia, ir + 1));
+    if (!solid(ia2, ir)) quad(P(ia2, ir), P(ia2, ir + 1), P(ia2, ir + 1, -T), P(ia2, ir, -T));
+    if (ir > 0 && !solid(ia, ir - 1)) quad(P(ia, ir), P(ia2, ir), P(ia2, ir, -T), P(ia, ir, -T));
+    if (ir < NR - 1 && !solid(ia, ir + 1)) quad(P(ia, ir + 1), P(ia, ir + 1, -T), P(ia2, ir + 1, -T), P(ia2, ir + 1));
   }
-  return grid(rows, true, true);
+  const g = new BufferGeometry();
+  g.setAttribute('position', new Float32BufferAttribute(pos, 3));
+  g.computeVertexNormals();
+  return g;
 }
 
 function hubGeo(): BufferGeometry {

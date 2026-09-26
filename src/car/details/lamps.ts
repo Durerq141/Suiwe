@@ -94,9 +94,15 @@ export function taillightInternals(skin: BodySkin, side: 'l' | 'r'): RoleGeo {
     const ring = reg.loop.map((p) => p.clone().lerp(reg.centroid, inset).addScaledVector(n, -depth));
     add(r, 'tailGlow', tube([...ring, ring[0]].map((p) => [p.x, p.y, p.z] as P3), 0.005, 8));
   }
-  // reverse lamp: inner end
+  // chrome reflector cups behind the lens, white reverse section at the inner end
   const s = side === 'l' ? 1 : -1;
-  const rev = reg.centroid.clone().add(new Vector3(-0.1 * s, -0.01, 0)).addScaledVector(n, -0.03);
-  add(r, 'reverse', cyl([rev.x, rev.y, rev.z], [rev.x + n.x * 0.01, rev.y + n.y * 0.01, rev.z + n.z * 0.01], 0.03, 0.03, 20));
+  for (const [dx, rr] of [[0.06, 0.036], [-0.02, 0.032]] as const) {
+    const c = reg.centroid.clone().add(new Vector3(dx * s, 0, 0)).addScaledVector(n, -0.06);
+    add(r, 'lampChrome', lathe([[0.008, 0], [0.02, 0.008], [rr, 0.024], [rr + 0.004, 0.04]], [c.x, c.y, c.z], [c.x + n.x, c.y + n.y, c.z + n.z], 28));
+    add(r, 'tailGlow', cyl([c.x, c.y, c.z], [c.x + n.x * 0.012, c.y + n.y * 0.012, c.z + n.z * 0.012], 0.008, 0.008, 10));
+  }
+  const rev = reg.centroid.clone().add(new Vector3(-0.1 * s, -0.005, 0)).addScaledVector(n, -0.035);
+  add(r, 'lampChrome', lathe([[0.006, 0], [0.018, 0.008], [0.03, 0.022], [0.033, 0.032]], [rev.x, rev.y, rev.z], [rev.x + n.x, rev.y + n.y, rev.z + n.z], 24));
+  add(r, 'reverse', cyl([rev.x + n.x * 0.026, rev.y + n.y * 0.026, rev.z + n.z * 0.026], [rev.x + n.x * 0.03, rev.y + n.y * 0.03, rev.z + n.z * 0.03], 0.032, 0.032, 20));
   return r;
 }
