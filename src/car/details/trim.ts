@@ -81,7 +81,7 @@ export function rearTrim(): RoleGeo {
   for (const s of [1, -1]) {
     const x = 0.52 * s;
     add(r, 'chrome', cyl([x, 0.305, -2.62], [x, 0.3, -2.9], 0.036, 0.042, 24, true));
-    add(r, 'black', cyl([x, 0.305, -2.62], [x, 0.3, -2.86], 0.03, 0.03, 16, true));
+    add(r, 'black', cyl([x, 0.305, -2.62], [x, 0.3, -2.86], 0.03, 0.03, 16, true), cyl([x, 0.304, -2.75], [x, 0.303, -2.76], 0.031, 0.031, 16));
     add(r, 'reflectorRed', rbox(0.12, 0.022, 0.012, 0.006, 0.7 * s, 0.53, -2.846 + 0.035 * 0.7 * 0.7));
   }
   return r;

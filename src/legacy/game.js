@@ -9058,6 +9058,8 @@ canvas{display:block}
 #ui{position:fixed;inset:0;pointer-events:none;z-index:5}
 #ui .layer{position:absolute;inset:0}
 .hidden{display:none!important}
+*{scrollbar-width:none}
+*::-webkit-scrollbar{display:none;width:0;height:0}
 #loading{background:radial-gradient(ellipse at 30% 60%,#3a2716 0%,#140e09 60%,#070504 100%);display:flex;flex-direction:column;align-items:flex-start;justify-content:flex-end;padding:7vh 8vw;pointer-events:auto;z-index:20}
 #loading .logo{margin-bottom:auto;margin-top:18vh}
 .logo .t1{font-size:clamp(34px,5.2vw,90px);font-weight:200;letter-spacing:.24em;line-height:1;color:#f4ead8;text-shadow:0 2px 30px rgba(232,167,74,.25);white-space:nowrap}
@@ -9257,11 +9259,12 @@ var Rh = class {
       <div class="items">
         <button class="mbtn" data-a="continue" ${I ? "" : "disabled"}>${J("Продолжить", "Continue")}<small>${I ? J("Последнее сохранение", "Last save") : J("Нет сохранений", "No saves")}</small></button>
         <button class="mbtn" data-a="new">${J("Новая игра", "New game")}</button>
+        <button class="mbtn" data-a="multiplayer">${J("Мультиплеер", "Multiplayer")}<small>${J("Скоро", "Coming soon")}</small></button>
         <button class="mbtn" data-a="settings">${J("Настройки", "Settings")}</button>
         <button class="mbtn" data-a="controls">${J("Управление", "Controls")}</button>
         <button class="mbtn" data-a="about">${J("Об игре", "About")}</button>
       </div>
-      <div class="foot">v1.0 · <b>THE LONG ROAD</b> · ${J("процедурная пустыня, созданная кодом", "a procedural desert made entirely of code")}</div>`, this.bindButtons(A, { continue: () => this.hooks.continueGame(), new: () => this.showNewGame(), settings: () => this.showSettings("menu"), controls: () => this.showSettings("menu", "controls"), about: () => this.showAbout() }), this.show("menu");
+      <div class="foot">v1.0 · <b>THE LONG ROAD</b> · ${J("процедурная пустыня, созданная кодом", "a procedural desert made entirely of code")}</div>`, this.bindButtons(A, { multiplayer: () => this.showMultiplayer(), continue: () => this.hooks.continueGame(), new: () => this.showNewGame(), settings: () => this.showSettings("menu"), controls: () => this.showSettings("menu", "controls"), about: () => this.showAbout() }), this.show("menu");
   }
   bindButtons(A, I) {
     A.querySelectorAll("[data-a]").forEach((g) => {
@@ -9281,6 +9284,11 @@ var Rh = class {
       let I = Number(document.getElementById("seed").value.replace(/\D/g, "")) || 1;
       this.saveSettings(), this.hooks.applySettings(this.settings), this.hooks.newGame(I);
     } });
+  }
+  showMultiplayer() {
+    this.overlay(`<h2>${J("Мульти<b>плеер</b>", "Multi<b>player</b>")}</h2>
+      <p style="max-width:560px;line-height:1.7;color:#ddd3c3">${J("Совместная поездка появится в одном из следующих обновлений: общий мир, одна машина на компанию, каждый видит руки и модели других игроков.", "Co-op road trips are coming in a future update: a shared world, one car for the crew, every player sees the others' hands and bodies.")}</p>
+      <div class="btnrow"><button class="btn" data-a="back">${J("Понятно", "Got it")}</button></div>`), this.bindButtons(this.layers.overlay, { back: () => this.hideOverlays() });
   }
   showAbout() {
     this.overlay(`<h2>${J("Об <b>игре</b>", "<b>About</b>")}</h2>
