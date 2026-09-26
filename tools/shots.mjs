@@ -15,7 +15,7 @@ const browser = await puppeteer.launch({
   executablePath: chrome,
   headless: true,
   protocolTimeout: 600000,
-  args: ['--no-sandbox', '--enable-webgl', '--ignore-gpu-blocklist', '--use-angle=swiftshader', '--enable-unsafe-swiftshader', `--window-size=${opt('w', 1600)},${opt('h', 900)}`],
+  args: ['--no-sandbox', '--enable-webgl', '--ignore-gpu-blocklist', '--use-angle=swiftshader', '--enable-unsafe-swiftshader', '--disable-gpu-sandbox', '--disable-dev-shm-usage', `--window-size=${opt('w', 1600)},${opt('h', 900)}`],
 });
 try {
   const page = await browser.newPage();
