@@ -9,6 +9,8 @@ import { buildClosures } from './body/closures';
 import { headlightInternals, taillightInternals } from './details/lamps';
 import { buildWheel } from './details/wheel';
 import { frontTrim, handle, mirror, rearTrim, shellTrim, trunkTrim } from './details/trim';
+import { cabin, doorCard, frontSeat, rearSeat } from './details/interior';
+import { skinGeometry } from './body/skin';
 
 export type RoleGeo = Record<string, BufferGeometry[]>;
 
@@ -99,6 +101,8 @@ export function buildCarParts(): { shell: RoleGeo; parts: Record<string, RoleGeo
   mergeInto(shell, buildClosures());
   mergeInto(shell, shellTrim());
   mergeInto(shell, rearTrim());
+  mergeInto(shell, cabin());
+  mergeInto(shell, { headliner: [skinGeometry(skin, ['roof'], { offset: -0.024, flip: true })], trim: [skinGeometry(skin, ['aPillar', 'cPillar'], { offset: -0.02, flip: true })] });
   const parts: Record<string, RoleGeo> = {};
   for (const [name, spec] of Object.entries(PANELS)) parts[name] = buildPanel(skin, spec);
   mergeInto(parts.headlight_l, headlightInternals(skin, 'l'));
@@ -113,6 +117,10 @@ export function buildCarParts(): { shell: RoleGeo; parts: Record<string, RoleGeo
   mergeInto(parts.door_fr, handle(-1, -0.24));
   mergeInto(parts.door_rl, handle(1, -1.13));
   mergeInto(parts.door_rr, handle(-1, -1.13));
+  for (const d of ['door_fl', 'door_fr', 'door_rl', 'door_rr'] as const) mergeInto(parts[d], doorCard(d));
+  parts.seat_d = frontSeat(0.42);
+  parts.seat_p = frontSeat(-0.42);
+  parts.seat_r = rearSeat();
   const w = buildWheel();
   for (const name of ['wheel_fl', 'wheel_fr', 'wheel_rl', 'wheel_rr']) {
     // wheels are authored at the origin for the left side; parts are in car space
