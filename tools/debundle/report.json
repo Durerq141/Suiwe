@@ -1,0 +1,362 @@
+{
+  "stats": {
+    "exact": 1186,
+    "bag": 84,
+    "special": 29,
+    "game": 578
+  },
+  "statements": 933,
+  "gameStatements": 421,
+  "imports": {
+    "three": [
+      "AdditiveBlending as TC",
+      "BackSide as iC",
+      "Bone as PQ",
+      "Box3 as Jg",
+      "BoxGeometry as uI",
+      "BufferAttribute as GI",
+      "BufferGeometry as SI",
+      "CanvasTexture as Mo",
+      "CatmullRomCurve3 as DC",
+      "CircleGeometry as VC",
+      "ClampToEdgeWrapping as LC",
+      "Color as nA",
+      "ConeGeometry as PB",
+      "CubeCamera as TE",
+      "CustomToneMapping as NQ",
+      "CylinderGeometry as VA",
+      "DirectionalLight as VQ",
+      "DoubleSide as OI",
+      "DynamicDrawUsage as XC",
+      "Euler as $I",
+      "ExtrudeGeometry as lB",
+      "Float32BufferAttribute as XA",
+      "FogExp2 as co",
+      "FrontSide as WB",
+      "Group as WA",
+      "HalfFloatType as wg",
+      "HemisphereLight as pi",
+      "IcosahedronGeometry as fo",
+      "InstancedMesh as WC",
+      "LatheGeometry as sQ",
+      "LinearFilter as Pg",
+      "LinearMipmapLinearFilter as VB",
+      "LineBasicMaterial as YE",
+      "LineSegments as wo",
+      "MathUtils as Ai",
+      "Matrix4 as TA",
+      "Mesh as cA",
+      "MeshBasicMaterial as pC",
+      "MeshPhysicalMaterial as rQ",
+      "MeshStandardMaterial as oI",
+      "NeutralToneMapping as ui",
+      "NoColorSpace as yB",
+      "NormalBlending as jQ",
+      "Object3D as Gg",
+      "OrthographicCamera as _B",
+      "Path as ZB",
+      "PCFShadowMap as di",
+      "PerspectiveCamera as vg",
+      "PlaneGeometry as PI",
+      "PMREMGenerator as ZE",
+      "PointLight as hQ",
+      "Points as yo",
+      "Quaternion as nI",
+      "Raycaster as Ni",
+      "RepeatWrapping as kC",
+      "RGBAFormat as EC",
+      "Scene as mC",
+      "ShaderChunk as pI",
+      "ShaderLib as zC",
+      "ShaderMaterial as xI",
+      "Shape as Zg",
+      "ShapeGeometry as aQ",
+      "Skeleton as Ki",
+      "SkinnedMesh as Ui",
+      "Sphere as FC",
+      "SphereGeometry as ug",
+      "SpotLight as Ji",
+      "Sprite as RE",
+      "SpriteMaterial as OQ",
+      "SRGBColorSpace as mg",
+      "TorusGeometry as Xg",
+      "TubeGeometry as nQ",
+      "Uint16BufferAttribute as Mi",
+      "UnsignedByteType as _g",
+      "Vector2 as eA",
+      "Vector3 as y",
+      "WebGLCubeRenderTarget as _E",
+      "WebGLRenderer as kn",
+      "WebGLRenderTarget as zI",
+      "ZeroFactor as qi"
+    ],
+    "three/addons/postprocessing/Pass.js": [
+      "Pass as oC"
+    ],
+    "three/addons/postprocessing/ShaderPass.js": [
+      "ShaderPass as Ii"
+    ],
+    "three/addons/postprocessing/EffectComposer.js": [
+      "EffectComposer as Rn"
+    ],
+    "three/addons/postprocessing/RenderPass.js": [
+      "RenderPass as un"
+    ],
+    "three/addons/postprocessing/UnrealBloomPass.js": [
+      "UnrealBloomPass as VE"
+    ],
+    "three/addons/postprocessing/OutputPass.js": [
+      "OutputPass as fn"
+    ],
+    "three/addons/postprocessing/GTAOPass.js": [
+      "GTAOPass as jE"
+    ],
+    "three/addons/utils/BufferGeometryUtils.js": [
+      "mergeGeometries as uw",
+      "mergeVertices as bi"
+    ],
+    "three/addons/geometries/RoundedBoxGeometry.js": [
+      "RoundedBoxGeometry as tg"
+    ],
+    "@dimforge/rapier3d-compat": [
+      "* as _I"
+    ]
+  },
+  "unresolved": [],
+  "leaks": [],
+  "suspicious": [],
+  "demoted": [
+    {
+      "name": "Eu",
+      "why": "ident pC->MeshBasicMaterial vs Vector3"
+    },
+    {
+      "name": "es",
+      "why": "refs game dl"
+    },
+    {
+      "name": "eM",
+      "why": "refs game J"
+    },
+    {
+      "name": "CE",
+      "why": "refs game Rh"
+    },
+    {
+      "name": "as",
+      "why": "refs game wM"
+    },
+    {
+      "name": "Bw",
+      "why": "non-export used by game"
+    },
+    {
+      "name": "Dw",
+      "why": "non-export used by game"
+    },
+    {
+      "name": "Gn",
+      "why": "non-export used by game"
+    },
+    {
+      "name": "ac",
+      "why": "non-export used by game"
+    },
+    {
+      "name": "Tn",
+      "why": "non-export used by game"
+    },
+    {
+      "name": "yw",
+      "why": "non-export used by game"
+    },
+    {
+      "name": "kw",
+      "why": "non-export used by game"
+    },
+    {
+      "name": "Kw",
+      "why": "non-export used by game"
+    },
+    {
+      "name": "Gw",
+      "why": "non-export used by game"
+    },
+    {
+      "name": "Fw",
+      "why": "non-export used by game"
+    },
+    {
+      "name": "pw",
+      "why": "non-export used by game"
+    },
+    {
+      "name": "Jw",
+      "why": "non-export used by game"
+    },
+    {
+      "name": "Lw",
+      "why": "non-export used by game"
+    },
+    {
+      "name": "uy",
+      "why": "non-export used by game"
+    },
+    {
+      "name": "fy",
+      "why": "non-export used by game"
+    },
+    {
+      "name": "Yy",
+      "why": "non-export used by game"
+    },
+    {
+      "name": "Ly",
+      "why": "non-export used by game"
+    },
+    {
+      "name": "Zd",
+      "why": "non-export used by game"
+    },
+    {
+      "name": "Jt",
+      "why": "non-export used by game"
+    },
+    {
+      "name": "Nt",
+      "why": "non-export used by game"
+    },
+    {
+      "name": "br",
+      "why": "non-export used by game"
+    },
+    {
+      "name": "my",
+      "why": "non-export used by game"
+    },
+    {
+      "name": "Wr",
+      "why": "non-export used by game"
+    },
+    {
+      "name": "nR",
+      "why": "written by game"
+    },
+    {
+      "name": "El",
+      "why": "non-export used by game"
+    },
+    {
+      "name": "tl",
+      "why": "non-export used by game"
+    },
+    {
+      "name": "Rk",
+      "why": "non-export used by game"
+    },
+    {
+      "name": "uk",
+      "why": "non-export used by game"
+    },
+    {
+      "name": "fk",
+      "why": "non-export used by game"
+    },
+    {
+      "name": "Sl",
+      "why": "non-export used by game"
+    },
+    {
+      "name": "NR",
+      "why": "written by game"
+    },
+    {
+      "name": "uR",
+      "why": "written by game"
+    },
+    {
+      "name": "Yk",
+      "why": "non-export used by game"
+    },
+    {
+      "name": "yl",
+      "why": "written by game"
+    },
+    {
+      "name": "PR",
+      "why": "non-export used by game"
+    },
+    {
+      "name": "ZR",
+      "why": "non-export used by game"
+    },
+    {
+      "name": "Qs",
+      "why": "non-export used by game"
+    },
+    {
+      "name": "_R",
+      "why": "non-export used by game"
+    },
+    {
+      "name": "WR",
+      "why": "non-export used by game"
+    },
+    {
+      "name": "XR",
+      "why": "non-export used by game"
+    },
+    {
+      "name": "Pk",
+      "why": "non-export used by game"
+    },
+    {
+      "name": "Xk",
+      "why": "non-export used by game"
+    },
+    {
+      "name": "IM",
+      "why": "non-export used by game"
+    },
+    {
+      "name": "lh",
+      "why": "non-export used by game"
+    },
+    {
+      "name": "aM",
+      "why": "non-export used by game"
+    },
+    {
+      "name": "Zt",
+      "why": "non-export used by game"
+    },
+    {
+      "name": "Pt",
+      "why": "non-export used by game"
+    },
+    {
+      "name": "lu",
+      "why": "non-export used by game"
+    },
+    {
+      "name": "Su",
+      "why": "non-export used by game"
+    },
+    {
+      "name": "_t",
+      "why": "non-export used by game"
+    },
+    {
+      "name": "cM",
+      "why": "non-export used by game"
+    },
+    {
+      "name": "aC",
+      "why": "non-export used by game"
+    },
+    {
+      "name": null,
+      "why": "lib refs game CE"
+    }
+  ]
+}
