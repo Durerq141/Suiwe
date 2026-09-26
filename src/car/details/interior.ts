@@ -136,7 +136,7 @@ export function doorCard(part: 'door_fl' | 'door_fr' | 'door_rl' | 'door_rr'): R
 }
 
 /** Everything bolted to the body shell inside the cabin. */
-export function cabin(): RoleGeo {
+export function cabin(opts: { steering?: boolean } = {}): RoleGeo {
   const r: RoleGeo = {};
   add(r, 'dash', dashboard());
   // binnacle hood over the cluster
@@ -174,7 +174,8 @@ export function cabin(): RoleGeo {
   add(r, 'black', cyl([0, 1.33, 0.19], [0, 1.37, 0.2], 0.008, 0.01, 8));
   add(r, 'rubber', rbox(0.07, 0.1, 0.012, 0.005, 0.36, 0.43, 0.62, -0.6), rbox(0.05, 0.13, 0.012, 0.005, 0.52, 0.44, 0.64, -0.5));
   add(r, 'dome', rbox(0.16, 0.02, 0.08, 0.01, ANCHORS.dome.x, ANCHORS.dome.y + 0.01, ANCHORS.dome.z));
-  // steering wheel + column (static copy; the game animates its own)
+  // steering wheel + column (static copy for previews; the game animates its own)
+  if (opts.steering === false) return r;
   const sw = steeringWheel();
   const m = steeringMatrix();
   for (const src of [sw.wheel, sw.fixed]) for (const [role, list] of Object.entries(src)) add(r, role, ...list.map((b) => b.clone().applyMatrix4(m)));

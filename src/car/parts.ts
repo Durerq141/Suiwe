@@ -93,7 +93,7 @@ function buildPanel(skin: BodySkin, spec: PanelSpec): RoleGeo {
 
 const mergeInto = (dst: RoleGeo, src: RoleGeo) => { for (const [role, list] of Object.entries(src)) (dst[role] ??= []).push(...list); };
 
-export function buildCarParts(): { shell: RoleGeo; parts: Record<string, RoleGeo> } {
+export function buildCarParts(opts: { steering?: boolean } = {}): { shell: RoleGeo; parts: Record<string, RoleGeo> } {
   const skin = bodySkin();
   const shellFaces = facesOf(skin, SHELL_TAGS);
   const s = solidify(skin.mesh, skin.normals, shellFaces, { gap: 0.0025, rim: 0.045 });
@@ -101,7 +101,7 @@ export function buildCarParts(): { shell: RoleGeo; parts: Record<string, RoleGeo
   mergeInto(shell, buildClosures());
   mergeInto(shell, shellTrim());
   mergeInto(shell, rearTrim());
-  mergeInto(shell, cabin());
+  mergeInto(shell, cabin(opts));
   mergeInto(shell, { headliner: [skinGeometry(skin, ['roof'], { offset: -0.024, flip: true })], trim: [skinGeometry(skin, ['aPillar', 'cPillar'], { offset: -0.02, flip: true })] });
   const parts: Record<string, RoleGeo> = {};
   for (const [name, spec] of Object.entries(PANELS)) parts[name] = buildPanel(skin, spec);

@@ -10,6 +10,7 @@ import { RenderPass as un } from "three/addons/postprocessing/RenderPass.js";
 import { ShaderPass as Ii } from "three/addons/postprocessing/ShaderPass.js";
 import { UnrealBloomPass as VE } from "three/addons/postprocessing/UnrealBloomPass.js";
 import { mergeGeometries as uw, mergeVertices as bi } from "three/addons/utils/BufferGeometryUtils.js";
+import { legacyShell, legacyPart, legacyDisc, legacyCaliper, LEGACY_PIVOTS, legacySteering, legacyGlovebox, legacyFuelDoor } from '../car/legacy';
 var tC = { sunColor: new Float32Array([1, 0.9, 0.75]), sunDir: new Float32Array([0, 1, 0]), params: new Float32Array([0.012, 0, 8, 1]) }, zJ = `
 #ifdef USE_FOG
   uniform vec3 fogColor;
@@ -3954,28 +3955,11 @@ function lk() {
   return { o: B.clone().add(A).multiplyScalar(0.5).addScaledVector(g, 4e-3), x: kA(-1, 0, 0), y: I, z: g };
 }
 function Sk() {
-  let C = Ah(-0.44, 0.711), Q = [], i = [];
-  for (let s = 0; s <= 18; s++) {
-    let a = -0.62 + 0.36 * s / 18, n = [], r = [];
-    for (let c = 0; c <= 8; c++) {
-      let h = 0.708 + 0.134 * c / 8, D = Ah(a, h);
-      n.push(D.clone().add(kA(0, 0, -7e-3)).sub(C)), r.push(D.clone().add(kA(0, 0, -15e-4)).sub(C));
-    }
-    Q.push(n), i.push(r);
-  }
-  let E = [], t = (s) => [...s.map((a) => a[0]), ...s[s.length - 1].slice(1), ...s.map((a) => a[a.length - 1]).reverse().slice(1), ...s[0].slice(1, -1).reverse()], o = t(Q), e = t(i);
-  for (let s = 0; s < o.length; s++) E.push([o[s], e[s]]);
-  return E.push([o[0], e[0]]), { geo: [QB(Q, true), QB(i), QB(E)], hinge: C };
+  return legacyGlovebox();
 }
 var rl = { hub: kA(0.42, 0.98, 0.1), dir: kA(0, 0.423, -0.906) };
 function wk() {
-  let B = {}, A = {};
-  m(B, "wheelRim", new Xg(0.19, 0.0165, 12, 64));
-  for (let g of [0, Math.PI, -Math.PI / 2]) {
-    let Q = fA(0.13, 0.042, 0.018, 8e-3, kA(Math.cos(g) * 0.12, Math.sin(g) * 0.12 - 0.012, -0.012), 0, 0, g);
-    m(B, "wheelSpoke", Q);
-  }
-  return m(B, "wheelSpoke", fA(0.15, 0.115, 0.05, 0.022, kA(0, -8e-3, 0.012))), m(B, "chrome", vC(0.02, 0.02, 4e-3, kA(0, 0, 0.039), Math.PI / 2, 0, 0, 24)), m(A, "trim", fA(0.1, 0.085, 0.3, 0.03, kA(0, -0.012, -0.2))), m(A, "trim", vC(0.045, 0.05, 0.03, kA(0, 0, -0.045), Math.PI / 2, 0, 0, 24)), m(A, "black", cg([kA(0.045, 0.012, -0.09), kA(0.12, 0.028, -0.085), kA(0.17, 0.035, -0.08)], 6e-3, 6)), m(A, "black", cg([kA(-0.045, 0.012, -0.09), kA(-0.12, 0.028, -0.085), kA(-0.17, 0.035, -0.08)], 6e-3, 6)), m(A, "chrome", vC(0.014, 0.014, 0.012, kA(0.056, -0.012, -0.15), 0, 0, Math.PI / 2, 16)), { wheel: B, fixed: A, keyPos: kA(0.062, -0.012, -0.15) };
+  return legacySteering();
 }
 function yk() {
   let B = {};
@@ -4227,6 +4211,8 @@ function dk() {
   return B;
 }
 var tB = ["door_fl", "door_fr", "door_rl", "door_rr", "hood", "trunk", "wheel_fl", "wheel_fr", "wheel_rl", "wheel_rr", "engine", "battery", "radiator", "headlight_l", "headlight_r", "bumper_f", "bumper_r", "seat_d", "seat_p", "seat_r", "fender_fl", "fender_fr", "windshield", "window_r", "taillight_l", "taillight_r"], JI = (B, A, I) => new y(B, A, I), QC = { door_fl: JI(0.95, 0.62, V.zHood - 0.02), door_fr: JI(-0.95, 0.62, V.zHood - 0.02), door_rl: JI(0.955, 0.62, V.zDoorSplit - 0.02), door_rr: JI(-0.955, 0.62, V.zDoorSplit - 0.02), hood: JI(0, TI(0, V.zHood) - 0.03, V.zHood + 0.03), trunk: JI(0, TI(0, V.zLid) - 0.03, V.zLid - 0.03), wheel_fl: JI(V.track, V.wheelR, V.axleF), wheel_fr: JI(-V.track, V.wheelR, V.axleF), wheel_rl: JI(V.track, V.wheelR, V.axleR), wheel_rr: JI(-V.track, V.wheelR, V.axleR), engine: JI(0, 0.36, 1.4), battery: JI(-0.46, 0.54, 1.86), radiator: JI(0, 0.6, 2.07), headlight_l: JI(0.7, 0.7, 2.2), headlight_r: JI(-0.7, 0.7, 2.2), bumper_f: JI(0, 0.42, 2.3), bumper_r: JI(0, 0.46, -2.7), seat_d: JI(KQ.frontX, V.yFloor, KQ.frontZ), seat_p: JI(-KQ.frontX, V.yFloor, KQ.frontZ), seat_r: JI(0, V.yFloor, KQ.rearZ), fender_fl: JI(0.9, 0.72, 1.45), fender_fr: JI(-0.9, 0.72, 1.45), windshield: JI(0, 1.2, 0.5), window_r: JI(0, 1.24, -1.55), taillight_l: JI(0.7, 0.79, -2.68), taillight_r: JI(-0.7, 0.79, -2.68) };
+// hinge / attachment pivots of the new sedan
+Object.assign(QC, LEGACY_PIVOTS);
 function Tt(B) {
   let A = new vI(B), I = ["#b8ab96", "#a9adb0", "#e8e6df", "#1d1f22", "#2f4a3c", "#5a1f24", "#26344f", "#8a7a55", "#5f6468", "#c9c3b4"], g = ["#2a2b2d", "#3b3631", "#5a5046", "#28303a"], C = "ABEKMHOPCTYX", Q = `${C[A.int(0, 11)]} ${A.int(100, 999)} ${C[A.int(0, 11)]}${C[A.int(0, 11)]}`;
   return { paint: A.pick(I), rust: A.range(0.04, 0.3), dust: A.range(0.12, 0.45), seat: A.pick(g), interior: A.pick(["#2c2d2f", "#3f3b37", "#5b554c"]), plate: Q, seed: B };
@@ -4438,6 +4424,8 @@ function FR() {
 function Hk(B) {
   let A = fk.get(B);
   if (A) return A;
+  const np = legacyPart(B);
+  if (np) return fk.set(B, np), np;
   let I = Bl().parts, g = B.endsWith("l") || B === "seat_d" ? 1 : -1;
   switch (B) {
     case "door_fl":
@@ -4498,12 +4486,10 @@ function JR() {
 }
 var Sl = null, NR = null;
 function dR() {
-  if (Sl) return Sl;
-  let B = new VA(0.15, 0.15, 0.024, 32);
-  return B.rotateZ(Math.PI / 2), B.translate(-0.045, 0, 0), Sl = B;
+  return Sl ??= legacyDisc();
 }
 function RR() {
-  return NR ??= fA(0.06, 0.12, 0.07, 0.02, JI(-0.045, 0.1, -0.06));
+  return NR ??= legacyCaliper();
 }
 function Cs(B, A, I) {
   let g = QC[B], C = new WA();
@@ -4523,7 +4509,7 @@ function Cs(B, A, I) {
 }
 var uR = null;
 function fR() {
-  return uR ??= gs(Bl().shell, $y(), Gk(), Nk(), dk(), YR());
+  return uR ??= legacyShell();
 }
 var GC = { z0: -1.88, z1: -1.73, y0: 0.765, y1: 0.905 };
 function YR() {
@@ -4531,10 +4517,7 @@ function YR() {
   return m(B, "grille", A.inner, A.edge), B;
 }
 function LR() {
-  let B = bI(1, Cg(GC.z0), Cg(GC.z1), Bg(GC.y0), Bg(GC.y1), { offset: 1e-3, gap: [25e-4, 25e-4, 25e-4, 25e-4], thickness: 6e-3 }), A = new VA(0.036, 0.036, 0.02, 20);
-  A.rotateZ(Math.PI / 2);
-  let I = JI(0.945, (GC.y0 + GC.y1) / 2, (GC.z0 + GC.z1) / 2);
-  return A.translate(I.x, I.y, I.z), { door: [B.outer, B.inner, B.edge], cap: A, neck: I, hinge: JI(0.962, (GC.y0 + GC.y1) / 2, GC.z1) };
+  return legacyFuelDoor();
 }
 function Tk(B, A, I = []) {
   let g = new WA();
@@ -4544,9 +4527,8 @@ function Tk(B, A, I = []) {
   let E = je(B, A.paint, A.rust, A.dust), t = lI({ map: ol(), emissive: 16777215, emissiveMap: ol(), emissiveIntensity: 0, roughness: 0.4 }), o = lI({ color: 16734750, emissive: 16730640, emissiveIntensity: 0.2, roughness: 0.4 }), e = tk(), s = lI({ color: 0, emissive: 16777215, emissiveMap: e.tex, emissiveIntensity: 0, roughness: 0.3 }), a = { brake: lI({ color: 6948870, emissive: 16718346, emissiveIntensity: 0, roughness: 0.3 }), dome: lI({ color: 15262416, emissive: 16773590, emissiveIntensity: 0, roughness: 0.4 }), dash: lI({ color: 1118481, emissive: 16747066, emissiveIntensity: 0, roughness: 0.4 }) }, n = { mats: B, look: A, paint: E, car: { ...a, face: t, needle: o, screen: s } };
   for (let tA of FQ(fR(), n)) C.add(tA);
   for (let tA of FQ(Bk(), n)) Q.add(tA);
-  let r = Ak();
-  for (let tA of [r.front, r.rear]) C.add(new cA(tA, IQ("plate", n)));
-  C.add(new cA(fA(0.32, 0.022, 0.03, 8e-3, JI(0, TI(0, -1.82) + 0, -1.82)), a.brake));
+  void Ak;
+  C.add(new cA(fA(0.32, 0.022, 0.03, 8e-3, JI(0, 1.096, -2.655)), a.brake));
   let c = lk(), h = new WA();
   new TA().makeBasis(c.x, c.y, c.z).setPosition(c.o).decompose(h.position, h.quaternion, h.scale), i.add(h), h.add(new cA(new PI(XI.w, XI.h), t));
   let D = (tA, MA, KA) => {
@@ -4574,7 +4556,7 @@ function Tk(B, A, I = []) {
   let W = new cA(fA(0.2, 0.105, 0.02, 8e-3, JI(0, 0.83, 0.3)), IQ("switch", n));
   i.add(W);
   let j = new cA(new PI(0.12, 0.032), s);
-  j.rotation.y = Math.PI, j.position.set(0, 0.848, 0.2895), i.add(j);
+  j.rotation.set(-0.18, Math.PI, 0, "YXZ"), j.position.set(0, 0.8706, 0.275), i.add(j);
   for (let tA of [-0.078, 0.078]) {
     let MA = new cA(new VA(0.014, 0.015, 0.016, 20).rotateX(Math.PI / 2), IQ("knob", n));
     MA.position.set(tA, 0.845, 0.284), i.add(MA);
@@ -4606,7 +4588,7 @@ function Tk(B, A, I = []) {
   let zA = new cA(fA(0.14, 0.03, 0.08, 4e-3, JI(0, 0, 0)), new pC({ visible: false }));
   zA.position.set(0, 1.47, -0.35), i.add(zA);
   let X = new WA();
-  X.position.set(0.03, 1.312, 0.19), X.add(new cA(new PI(0.05, 0.07).translate(0, -0.075, 0), lI({ color: 3115578, roughness: 0.8, side: OI }))), X.add(new cA(new VA(8e-4, 8e-4, 0.04).translate(0, -0.02, 0), B.plasticBlack)), i.add(X);
+  X.position.set(0.03, 1.268, 0.165), X.add(new cA(new PI(0.05, 0.07).translate(0, -0.075, 0), lI({ color: 3115578, roughness: 0.8, side: OI }))), X.add(new cA(new VA(8e-4, 8e-4, 0.04).translate(0, -0.02, 0), B.plasticBlack)), i.add(X);
   let BA = { root: g, body: C, frame: Q, paint: E, parts: {}, steering: L, gauges: { speed: l, tach: U, fuel: S, temp: k, lights: G, odo: M, faceMat: t, needleMat: o }, lamps: a, radio: { body: W, display: e, screen: s }, key: b, gearLever: oA, handbrake: O, glovebox: _, fuelCap: dA, fuelNeck: DA.neck, dome: zA, interiorGroup: i, freshener: X, look: A };
   for (let tA of tB) {
     if (I.includes(tA)) continue;
